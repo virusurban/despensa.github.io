@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- Viewport crítico para móviles: evita zooms automáticos raros -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lista de Compras del Hogar</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff; /* Fondo limpio completamente blanco para celular */
+            color: #2d3748;
+            margin: 0;
+            padding: 0;
+        }
+        /* Contenedor adaptado a pantalla completa de móvil */
+        .mobile-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .content-wrap {
+            padding: 20px 16px;
+        }
+        .form-control {
+            border-radius: 12px;
+            padding: 14px 16px;
+            border: 1px solid #cbd5e1;
+            font-size: 1rem; /* Tamaño ideal de 16px para evitar zoom automático en iOS */
+            background-color: #f8fafc;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            border-color: #2563eb;
+            background-color: #ffffff;
+        }
+        .btn {
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-primary { background-color: #2563eb; border: none; }
+        .btn-success { background-color: #10b981; border: none; }
+        
+        /* Botón de salir limpio estilo texto móvil */
+        .btn-link-salir {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 4px 8px;
+            text-decoration: none;
+        }
+
+        /* Elementos de la lista táctiles y cómodos para el dedo */
+        .list-group-item {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px !important;
+            margin-bottom: 10px;
+            padding: 16px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s ease;
+        }
+        .list-group-item:active {
+            background-color: #e2e8f0;
+        }
+        .producto-texto {
+            transition: color 0.3s ease, opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <div class="content-wrap">
+            
+            <!-- SECCIÓN 2: Aplicación Principal (Oculta por defecto) -->
+            <div id="app-section" class="d-none">
+                <!-- Encabezado móvil superior -->
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                    <div>
+                        <span class="text-muted" style="font-size: 0.8rem;">Bienvenido/a</span>
+                        <span id="user-greeting" class="fw-bold text-dark d-block" style="font-size: 1.1rem;"></span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Botón de Administrador -->
+                        <button id="btn-admin-panel" class="btn btn-sm btn-outline-warning text-dark fw-semibold px-2 d-none" style="font-size: 0.85rem;">Admin</button>
+                        <!-- Botón de salir limpio -->
+                        <button id="btn-logout" class="btn-link-salir">Salir</button>
+                    </div>
+                </div>
+
+                <!-- Título de la sección -->
+                <div class="mb-3">
+                    <h4 class="fw-bold text-dark mb-0 text-center">Lista de Compras</h4>
+                </div>
+
+                <!-- Barra para agregar productos (Tamaño óptimo para pulgar) -->
+                <div class="input-group mb-4 shadow-sm">
+                    <input type="text" id="input-producto" class="form-control" placeholder="¿Qué falta comprar?">
+                    <button id="btn-agregar" class="btn btn-success px-4">Añadir</button>
+                </div>
+
+                <!-- Aquí se inyectará la lista -->
+                <ul id="lista-compras" class="list-group p-0">
+                    <!-- Los items aparecerán aquí -->
+                </ul>
+            </div>
+            
+            <!-- SECCIÓN 1: Inicio de Sesión (Visible por defecto) -->
+            <div id="auth-section" class="mt-5 pt-4">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold text-dark">Mi Despensa</h3>
+                    <p class="text-muted small">Inicia sesión para ver la lista del hogar</p>
+                </div>
+                <div class="mb-3">
+                    <input type="text" id="email" class="form-control" placeholder="Usuario o correo" autocapitalize="none" required>
+                </div>
+                <div class="mb-4">
+                    <input type="password" id="password" class="form-control" placeholder="Contraseña" required>
+                </div>
+                <button id="btn-login" class="btn btn-primary w-100 py-3 shadow-sm mb-2">Entrar</button>
+                <p id="auth-error" class="text-danger mt-3 small text-center fw-semibold"></p>
+            </div>
+
+            <!-- SECCIÓN 3: Panel de Administrador (Oculta por defecto) -->
+            <div id="admin-section" class="d-none mt-2">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h4 class="fw-bold mb-0 text-dark">Panel de Control</h4>
+                    <button id="btn-cerrar-admin" class="btn btn-sm btn-light border py-1 px-3">Volver</button>
+                </div>
+                
+                <div class="card p-3 mb-4 border bg-light shadow-sm rounded-4">
+                    <h6 class="fw-semibold mb-3 text-secondary">Nuevo Usuario</h6>
+                    <input type="text" id="new-user-name" class="form-control mb-2" placeholder="Nombre (ej. Brandon)" autocapitalize="none">
+                    <input type="email" id="new-user-email" class="form-control mb-2" placeholder="Correo electrónico">
+                    <input type="password" id="new-user-password" class="form-control mb-3" placeholder="Contraseña temporal">
+                    <button id="btn-crear-usuario" class="btn btn-dark w-100 fw-semibold py-2">Crear Usuario</button>
+                    <p id="admin-msg" class="mt-2 small fw-bold text-center"></p>
+                </div>
+
+                <h6 class="fw-semibold mb-2 text-secondary">Usuarios con acceso:</h6>
+                <ul id="lista-usuarios" class="list-group mb-4">
+                    <!-- Los usuarios aparecerán aquí -->
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
